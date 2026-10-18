@@ -14,6 +14,18 @@ public class AppSettings
     public string AccountNumber { get; set; } = "";
     public string GasMpan { get; set; } = "";
     public string ElectricMpan { get; set; } = "";
+    public string GasMeterSerial { get; set; } = "";
+    public string ElectricMeterSerial { get; set; } = "";
+
+    /// <summary>
+    /// SMETS2 gas meters report consumption in m³, SMETS1 in kWh. When true the
+    /// reported values are converted to kWh for display.
+    /// </summary>
+    public bool GasMeterIsCubicMetres { get; set; }
+
+    /// <summary>Daily usage targets in kWh, used to scale the overview progress bars.</summary>
+    public double GasGoal { get; set; }
+    public double ElectricGoal { get; set; }
 
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 

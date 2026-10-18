@@ -22,6 +22,9 @@ packages/
 *.tmp
 
 # Secrets and local config
+# appsettings.json holds the Octopus API key. The app writes it to
+# %APPDATA%\WinOctoUtil\, so it should never appear here - this is a safety net.
+appsettings.json
 appsettings.Development.json
 appsettings.Local.json
 secrets.json

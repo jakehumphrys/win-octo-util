@@ -1,7 +1,7 @@
 <Window x:Class="UsageWidget.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Settings" Width="380" SizeToContent="Height"
+        Title="Settings" Width="400" SizeToContent="Height"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
@@ -148,14 +148,41 @@
             <TextBlock Text="ACCOUNT NUMBER" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
             <TextBox x:Name="AccountBox" Style="{StaticResource Field}"/>
 
+            <TextBlock Text="ELECTRICITY MPAN" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
+            <TextBox x:Name="ElectricMpanBox" Style="{StaticResource Field}"/>
+
+            <TextBlock Text="ELECTRICITY METER SERIAL" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
+            <TextBox x:Name="ElectricSerialBox" Style="{StaticResource Field}"/>
+
             <TextBlock Text="GAS METER MPAN" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
             <TextBox x:Name="GasMpanBox" Style="{StaticResource Field}"/>
 
-            <TextBlock Text="ELECTRIC METER MPAN" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
-            <TextBox x:Name="ElectricMpanBox" Style="{StaticResource Field}" Margin="0,4,0,4"/>
+            <TextBlock Text="GAS METER SERIAL" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
+            <TextBox x:Name="GasSerialBox" Style="{StaticResource Field}"/>
+
+            <CheckBox x:Name="GasCubicMetresBox" Foreground="{StaticResource Text}" FontSize="12"
+                      Content="Gas readings are in m³ (SMETS2 meter)" Margin="0,0,0,12"/>
+
+            <TextBlock Text="DAILY GOALS (kWh)" Style="{StaticResource SmallLabel}"
+                       FontWeight="SemiBold" Margin="0,0,0,4"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Electricity" Style="{StaticResource SmallLabel}"/>
+                    <TextBox x:Name="ElectricGoalBox" Style="{StaticResource Field}" Margin="0,4,0,0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Gas" Style="{StaticResource SmallLabel}"/>
+                    <TextBox x:Name="GasGoalBox" Style="{StaticResource Field}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Grid>
 
             <TextBlock x:Name="Status" Foreground="{StaticResource Text}" FontSize="11"
-                       TextWrapping="Wrap" Margin="0,6,0,0"/>
+                       TextWrapping="Wrap" Margin="0,12,0,0"/>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
                 <Button Style="{StaticResource GhostBtn}" Content="Close" Click="CloseClick"/>
