@@ -1,0 +1,32 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+publish/
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+
+# NuGet
+*.nupkg
+packages/
+
+# Logs and temp
+*.log
+*.tmp
+
+# Secrets and local config
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+.env
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinOctoUtil", "WinOctoUtil.csproj", "{BC7033ED-47D2-4B74-B956-8F8B398963A7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BC7033ED-47D2-4B74-B956-8F8B398963A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC7033ED-47D2-4B74-B956-8F8B398963A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC7033ED-47D2-4B74-B956-8F8B398963A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC7033ED-47D2-4B74-B956-8F8B398963A7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
