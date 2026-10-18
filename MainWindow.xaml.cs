@@ -267,10 +267,12 @@ public partial class MainWindow : Window
     /// <summary>
     /// Lays the day out as 48 half-hour slots, dropping each reading into its time slot.
     /// Empty slots stay flat, so a partial day looks partial instead of stretching to fill.
+    /// Each slot also carries the time range and kWh for its hover tooltip.
     /// </summary>
-    private List<double> BuildSlots(IReadOnlyList<Consumption> records, double unitFactor)
+    private List<ChartSlot> BuildSlots(IReadOnlyList<Consumption> records, double unitFactor)
     {
         var values = new double[HalfHourSlots];
+        var seen = new bool[HalfHourSlots];
 
         foreach (var record in records)
         {
@@ -280,14 +282,26 @@ public partial class MainWindow : Window
 
             // Summing copes with the repeated hour on the autumn clock change.
             values[slot] += record.Value * unitFactor;
+            seen[slot] = true;
         }
 
         var max = values.Max();
-        if (max <= 0) return values.ToList();
 
-        return values
-            .Select(v => v <= 0 ? 0.0 : Math.Max(2, v / max * ChartHeight))
-            .ToList();
+        var slots = new List<ChartSlot>(HalfHourSlots);
+        for (var i = 0; i < HalfHourSlots; i++)
+        {
+            var start = _day.AddMinutes(i * 30);
+
+            slots.Add(new ChartSlot
+            {
+                Height = max <= 0 || values[i] <= 0 ? 0.0 : Math.Max(2, values[i] / max * ChartHeight),
+                HasReading = seen[i],
+                Time = $"{start:HH:mm} – {start.AddMinutes(30):HH:mm}",
+                Value = values[i]
+            });
+        }
+
+        return slots;
     }
 
     private void SetStatus(string text, bool ok)
@@ -306,4 +320,28 @@ public partial class MainWindow : Window
     }
 
     private static Brush Brush(string hex) => (Brush)new BrushConverter().ConvertFromString(hex)!;
+}
+
+/// <summary>
+/// One half-hour column of a day chart. Beyond the bar height it carries the time range
+/// and usage so hovering a column can report them.
+/// </summary>
+public class ChartSlot
+{
+    /// <summary>Bar height in pixels; 0 for an empty slot so gaps stay flat.</summary>
+    public double Height { get; init; }
+
+    /// <summary>True when at least one reading fell in this half hour.</summary>
+    public bool HasReading { get; init; }
+
+    /// <summary>Local "HH:mm – HH:mm" range the slot covers.</summary>
+    public string Time { get; init; } = "";
+
+    /// <summary>Usage for the slot, already unit-converted to kWh.</summary>
+    public double Value { get; init; }
+
+    /// <summary>Text shown when the column is hovered.</summary>
+    public string ToolTip => HasReading
+        ? $"{Time}\n{Value:0.000} kWh"
+        : $"{Time}\nno reading";
 }

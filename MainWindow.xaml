@@ -169,8 +169,10 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Height="{Binding}" VerticalAlignment="Bottom" Margin="0.5,0"
-                                    CornerRadius="2,2,0,0" Background="#3DDC84"/>
+                            <Grid Background="Transparent" ToolTip="{Binding ToolTip}">
+                                <Border Height="{Binding Height}" VerticalAlignment="Bottom" Margin="0.5,0"
+                                        CornerRadius="2,2,0,0" Background="#3DDC84"/>
+                            </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -188,8 +190,10 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Height="{Binding}" VerticalAlignment="Bottom" Margin="0.5,0"
-                                    CornerRadius="2,2,0,0" Background="#F2994A"/>
+                            <Grid Background="Transparent" ToolTip="{Binding ToolTip}">
+                                <Border Height="{Binding Height}" VerticalAlignment="Bottom" Margin="0.5,0"
+                                        CornerRadius="2,2,0,0" Background="#F2994A"/>
+                            </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
