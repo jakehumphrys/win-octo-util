@@ -8,9 +8,9 @@
         FontFamily="Segoe UI" MouseLeftButtonDown="Drag">
 
     <Window.Resources>
-        <SolidColorBrush x:Key="Muted" Color="#8A9096"/>
+        <SolidColorBrush x:Key="Muted" Color="#A79BC9"/>
         <SolidColorBrush x:Key="Text" Color="#E6E6E6"/>
-        <SolidColorBrush x:Key="Track" Color="#3A4045"/>
+        <SolidColorBrush x:Key="Track" Color="#4A3A78"/>
 
         <!-- Rounded progress bar. Height sets thickness, Foreground sets fill colour -->
         <Style TargetType="ProgressBar">
@@ -62,7 +62,14 @@
 
     <!-- Margin leaves room for the drop shadow -->
     <Border Margin="12" Padding="18,16" CornerRadius="14"
-            Background="#1E2327" BorderBrush="#3A4045" BorderThickness="1">
+            BorderBrush="#4A3A78" BorderThickness="1">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#3B2475" Offset="0"/>
+                <GradientStop Color="#231642" Offset="0.55"/>
+                <GradientStop Color="#140D2B" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
         <Border.Effect>
             <DropShadowEffect BlurRadius="18" ShadowDepth="0" Opacity="0.6"/>
         </Border.Effect>
