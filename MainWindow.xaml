@@ -82,6 +82,8 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Text="🐙" Foreground="#FF7A59" FontSize="13"
                                VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <Button Style="{StaticResource HeaderBtn}" Content="⚙" Click="OpenSettings"
+                            ToolTip="Settings"/>
                     <Button x:Name="CollapseToggle" Style="{StaticResource HeaderBtn}" Content="▾"
                             Click="ToggleDetails" ToolTip="Collapse"/>
                     <Button Style="{StaticResource HeaderBtn}" Content="–" Click="Minimise"/>

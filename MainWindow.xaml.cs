@@ -31,6 +31,12 @@ public partial class MainWindow : Window
     private void Minimise(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
     private void Close(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
 
+    private void OpenSettings(object sender, RoutedEventArgs e)
+    {
+        var window = new SettingsWindow { Owner = this };
+        window.ShowDialog();
+    }
+
     // ▾ / ▴ collapses the window down to just the gas + electricity overview.
     private void ToggleDetails(object sender, RoutedEventArgs e)
     {
