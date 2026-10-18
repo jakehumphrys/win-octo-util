@@ -30,6 +30,15 @@ public partial class MainWindow : Window
  
     private void Minimise(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
     private void Close(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
+
+    // ▾ / ▴ collapses the window down to just the gas + electricity overview.
+    private void ToggleDetails(object sender, RoutedEventArgs e)
+    {
+        var collapse = Details.Visibility == Visibility.Visible;
+        Details.Visibility = collapse ? Visibility.Collapsed : Visibility.Visible;
+        CollapseToggle.Content = collapse ? "▴" : "▾";
+        CollapseToggle.ToolTip = collapse ? "Expand" : "Collapse";
+    }
  
     private static Brush Brush(string hex) => (Brush)new BrushConverter().ConvertFromString(hex)!;
 }

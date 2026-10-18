@@ -82,7 +82,8 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Text="🐙" Foreground="#FF7A59" FontSize="13"
                                VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <Button Style="{StaticResource HeaderBtn}" Content="▾"/>
+                    <Button x:Name="CollapseToggle" Style="{StaticResource HeaderBtn}" Content="▾"
+                            Click="ToggleDetails" ToolTip="Collapse"/>
                     <Button Style="{StaticResource HeaderBtn}" Content="–" Click="Minimise"/>
                     <Button Style="{StaticResource HeaderBtn}" Content="✕" Click="Close"/>
                 </StackPanel>
@@ -117,74 +118,77 @@
                 </StackPanel>
             </Grid>
 
-            <TextBlock Text="today so far · last reading 19:30" Margin="0,10,0,16"
-                       Foreground="{StaticResource Text}" FontSize="13"/>
+            <!-- Collapsible detail (hidden when the header arrow is toggled) -->
+            <StackPanel x:Name="Details">
+                <TextBlock Text="today so far · last reading 19:30" Margin="0,10,0,16"
+                           Foreground="{StaticResource Text}" FontSize="13"/>
 
-            <!-- Secondary rows -->
-            <!-- Electricity today -->
-            <Grid Margin="0,0,0,6">
-                <TextBlock Text="ELECTRICITY · TODAY" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
-                <TextBlock Text="00:00 → now" Style="{StaticResource SmallLabel}" HorizontalAlignment="Right"/>
-            </Grid>
-            <ItemsControl Height="40" Margin="0,0,0,16">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Height="{Binding}" VerticalAlignment="Bottom" Margin="1,0"
-                                CornerRadius="2,2,0,0" Background="#3DDC84"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemsSource>
-                    <x:Array Type="sys:Double">
-                        <sys:Double>6</sys:Double><sys:Double>5</sys:Double><sys:Double>5</sys:Double>
-                        <sys:Double>5</sys:Double><sys:Double>6</sys:Double><sys:Double>9</sys:Double>
-                        <sys:Double>22</sys:Double><sys:Double>30</sys:Double><sys:Double>18</sys:Double>
-                        <sys:Double>10</sys:Double><sys:Double>8</sys:Double><sys:Double>9</sys:Double>
-                        <sys:Double>12</sys:Double><sys:Double>10</sys:Double><sys:Double>8</sys:Double>
-                        <sys:Double>11</sys:Double><sys:Double>20</sys:Double><sys:Double>34</sys:Double>
-                        <sys:Double>38</sys:Double><sys:Double>28</sys:Double>
-                    </x:Array>
-                </ItemsControl.ItemsSource>
-            </ItemsControl>
+                <!-- Secondary rows -->
+                <!-- Electricity today -->
+                <Grid Margin="0,0,0,6">
+                    <TextBlock Text="ELECTRICITY · TODAY" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
+                    <TextBlock Text="00:00 → now" Style="{StaticResource SmallLabel}" HorizontalAlignment="Right"/>
+                </Grid>
+                <ItemsControl Height="40" Margin="0,0,0,16">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Height="{Binding}" VerticalAlignment="Bottom" Margin="1,0"
+                                    CornerRadius="2,2,0,0" Background="#3DDC84"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsSource>
+                        <x:Array Type="sys:Double">
+                            <sys:Double>6</sys:Double><sys:Double>5</sys:Double><sys:Double>5</sys:Double>
+                            <sys:Double>5</sys:Double><sys:Double>6</sys:Double><sys:Double>9</sys:Double>
+                            <sys:Double>22</sys:Double><sys:Double>30</sys:Double><sys:Double>18</sys:Double>
+                            <sys:Double>10</sys:Double><sys:Double>8</sys:Double><sys:Double>9</sys:Double>
+                            <sys:Double>12</sys:Double><sys:Double>10</sys:Double><sys:Double>8</sys:Double>
+                            <sys:Double>11</sys:Double><sys:Double>20</sys:Double><sys:Double>34</sys:Double>
+                            <sys:Double>38</sys:Double><sys:Double>28</sys:Double>
+                        </x:Array>
+                    </ItemsControl.ItemsSource>
+                </ItemsControl>
 
-            <!-- Gas today -->
-            <Grid Margin="0,0,0,6">
-                <TextBlock Text="GAS · TODAY" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
-                <TextBlock Text="00:00 → now" Style="{StaticResource SmallLabel}" HorizontalAlignment="Right"/>
-            </Grid>
-            <ItemsControl Height="40" Margin="0,0,0,16">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Height="{Binding}" VerticalAlignment="Bottom" Margin="1,0"
-                                CornerRadius="2,2,0,0" Background="#F2994A"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemsSource>
-                    <x:Array Type="sys:Double">
-                        <sys:Double>2</sys:Double><sys:Double>2</sys:Double><sys:Double>2</sys:Double>
-                        <sys:Double>2</sys:Double><sys:Double>3</sys:Double><sys:Double>14</sys:Double>
-                        <sys:Double>36</sys:Double><sys:Double>30</sys:Double><sys:Double>10</sys:Double>
-                        <sys:Double>6</sys:Double><sys:Double>5</sys:Double><sys:Double>4</sys:Double>
-                        <sys:Double>6</sys:Double><sys:Double>5</sys:Double><sys:Double>4</sys:Double>
-                        <sys:Double>5</sys:Double><sys:Double>12</sys:Double><sys:Double>24</sys:Double>
-                        <sys:Double>32</sys:Double><sys:Double>20</sys:Double>
-                    </x:Array>
-                </ItemsControl.ItemsSource>
-            </ItemsControl>
+                <!-- Gas today -->
+                <Grid Margin="0,0,0,6">
+                    <TextBlock Text="GAS · TODAY" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
+                    <TextBlock Text="00:00 → now" Style="{StaticResource SmallLabel}" HorizontalAlignment="Right"/>
+                </Grid>
+                <ItemsControl Height="40" Margin="0,0,0,16">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Height="{Binding}" VerticalAlignment="Bottom" Margin="1,0"
+                                    CornerRadius="2,2,0,0" Background="#F2994A"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsSource>
+                        <x:Array Type="sys:Double">
+                            <sys:Double>2</sys:Double><sys:Double>2</sys:Double><sys:Double>2</sys:Double>
+                            <sys:Double>2</sys:Double><sys:Double>3</sys:Double><sys:Double>14</sys:Double>
+                            <sys:Double>36</sys:Double><sys:Double>30</sys:Double><sys:Double>10</sys:Double>
+                            <sys:Double>6</sys:Double><sys:Double>5</sys:Double><sys:Double>4</sys:Double>
+                            <sys:Double>6</sys:Double><sys:Double>5</sys:Double><sys:Double>4</sys:Double>
+                            <sys:Double>5</sys:Double><sys:Double>12</sys:Double><sys:Double>24</sys:Double>
+                            <sys:Double>32</sys:Double><sys:Double>20</sys:Double>
+                        </x:Array>
+                    </ItemsControl.ItemsSource>
+                </ItemsControl>
 
-            <!-- Status -->
-            <StackPanel Orientation="Horizontal">
-                <Ellipse Width="9" Height="9" Fill="#3DDC84" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBlock Text="All systems operational" Foreground="{StaticResource Text}" FontSize="13"/>
+                <!-- Status -->
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="9" Height="9" Fill="#3DDC84" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="All systems operational" Foreground="{StaticResource Text}" FontSize="13"/>
+                </StackPanel>
+
+                <TextBlock x:Name="Stamp" Text="19:54:26" FontSize="10" Foreground="#5A6066"
+                           HorizontalAlignment="Right" Margin="0,8,0,0"/>
             </StackPanel>
-
-            <TextBlock x:Name="Stamp" Text="19:54:26" FontSize="10" Foreground="#5A6066"
-                       HorizontalAlignment="Right" Margin="0,8,0,0"/>
         </StackPanel>
     </Border>
 </Window>
