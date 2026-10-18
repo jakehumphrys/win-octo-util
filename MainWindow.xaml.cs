@@ -77,7 +77,8 @@ public partial class MainWindow : Window
         _auditWindow.Show();
     }
 
-    private async void Refresh(object sender, RoutedEventArgs e) => await RefreshData();
+    // The refresh button forces a fresh call for the day on screen, even if it is cached.
+    private async void Refresh(object sender, RoutedEventArgs e) => await RefreshData(force: true);
 
     private async void PreviousDay(object sender, RoutedEventArgs e)
     {
@@ -96,8 +97,10 @@ public partial class MainWindow : Window
     /// <summary>
     /// Pulls the selected day's half-hourly consumption for both fuels and paints the widget.
     /// Called on start-up, on the refresh button and on day navigation - never on a timer.
+    /// Past days are served from the local cache when possible; pass <paramref name="force"/>
+    /// to fetch the day on screen again (the refresh button does this).
     /// </summary>
-    private async Task RefreshData()
+    private async Task RefreshData(bool force = false)
     {
         if (_busy) return;
 
@@ -109,6 +112,14 @@ public partial class MainWindow : Window
         {
             Audit.Event("Refresh skipped - Octopus details not configured");
             SetStatus("Add your Octopus details in settings", false);
+            return;
+        }
+
+        // A completed past day never changes, so serve it from disk and skip the network
+        // entirely. Today is always fetched because its readings are still arriving.
+        if (!force && !isToday && UsageCache.TryGet(_day, _settings, out var cached))
+        {
+            ShowCached(cached);
             return;
         }
 
@@ -146,14 +157,15 @@ public partial class MainWindow : Window
             var gasTotal = ApplyFuel(GasValue, GasBar, GasChart,
                                      gas, _settings.GasGoal, gasFactor);
 
-            var lastEnd = electric.Select(r => (DateTimeOffset?)r.IntervalEnd)
-                .Concat(gas.Select(r => (DateTimeOffset?)r.IntervalEnd))
-                .DefaultIfEmpty()
-                .Max();
+            SetReadingInfo(electric, gas);
+            ShowCacheBadge(false);
 
-            ReadingInfo.Text = lastEnd.HasValue
-                ? $"{(isToday ? "today so far" : "full day")} · last reading {lastEnd.Value.ToLocalTime():HH:mm}"
-                : $"{(isToday ? "today so far" : "this day")} · no readings{(isToday ? " yet" : "")}";
+            // A completed day is worth keeping so revisiting it costs nothing later.
+            if (!isToday)
+            {
+                UsageCache.Put(_day, _settings, electric, gas);
+                Audit.Event("Day cached", $"Day: {_day:yyyy-MM-dd}");
+            }
 
             SetStatus("All systems operational", true);
             Audit.Event("Usage loaded",
@@ -175,10 +187,56 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Paints a day straight from the local cache - no API request is made. The status
+    /// line and the "from cache" badge make it clear the numbers were not re-fetched,
+    /// and the hit is written to the activity log.
+    /// </summary>
+    private void ShowCached(UsageCache.Day cached)
+    {
+        var gasFactor = _settings.GasMeterIsCubicMetres ? CubicMetresToKwh : 1.0;
+        var electricTotal = ApplyFuel(ElectricValue, ElectricBar, ElectricChart,
+                                      cached.Electricity, _settings.ElectricGoal, 1.0);
+        var gasTotal = ApplyFuel(GasValue, GasBar, GasChart,
+                                 cached.Gas, _settings.GasGoal, gasFactor);
+
+        SetReadingInfo(cached.Electricity, cached.Gas);
+        ShowCacheBadge(true);
+        SetStatus("Showing cached data", true);
+
+        Audit.Event("Cache hit - served without a request",
+            $"Day: {_day:yyyy-MM-dd}\n" +
+            $"Electricity: {electricTotal:0.00} kWh ({cached.Electricity.Count} readings)\n" +
+            $"Gas: {gasTotal:0.00} kWh ({cached.Gas.Count} readings)\n" +
+            $"Cached: {cached.CachedAt:yyyy-MM-dd HH:mm:ss}");
+    }
+
+    /// <summary>Writes the "last reading" line shared by the live and cached paths.</summary>
+    private void SetReadingInfo(IReadOnlyList<Consumption> electric, IReadOnlyList<Consumption> gas)
+    {
+        var isToday = _day == DateTime.Today;
+
+        var lastEnd = electric.Select(r => (DateTimeOffset?)r.IntervalEnd)
+            .Concat(gas.Select(r => (DateTimeOffset?)r.IntervalEnd))
+            .DefaultIfEmpty()
+            .Max();
+
+        ReadingInfo.Text = lastEnd.HasValue
+            ? $"{(isToday ? "today so far" : "full day")} · last reading {lastEnd.Value.ToLocalTime():HH:mm}"
+            : $"{(isToday ? "today so far" : "this day")} · no readings{(isToday ? " yet" : "")}";
+    }
+
+    /// <summary>Shows or hides the "from cache" badge under the day navigator.</summary>
+    private void ShowCacheBadge(bool fromCache)
+        => CacheBadge.Visibility = fromCache ? Visibility.Visible : Visibility.Collapsed;
+
     /// <summary>Refreshes the day label, the "still arriving" hint and the chart headings.</summary>
     private void UpdateDayHeader()
     {
         var isToday = _day == DateTime.Today;
+
+        // Any day change clears the badge; the cache/live paths set it again below.
+        ShowCacheBadge(false);
 
         DayLabel.Text = isToday ? "Today" : _day.ToString("ddd d MMM");
         TodayHint.Visibility = isToday ? Visibility.Visible : Visibility.Collapsed;

@@ -113,6 +113,10 @@
                 <TextBlock x:Name="TodayHint" Text="today's readings may still be arriving"
                            Foreground="{StaticResource Warn}" FontSize="10" HorizontalAlignment="Center"
                            Margin="0,6,0,0"/>
+                <TextBlock x:Name="CacheBadge" Text="⇓ from cache" Visibility="Collapsed"
+                           Foreground="#8AB4F8" FontSize="10" HorizontalAlignment="Center"
+                           Margin="0,6,0,0"
+                           ToolTip="Loaded from the local cache — no API request was made"/>
             </StackPanel>
 
             <!-- Usage Overview -->
