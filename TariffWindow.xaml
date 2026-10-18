@@ -1,0 +1,159 @@
+<Window x:Class="UsageWidget.TariffWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tariff &amp; Cost" Width="440" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        FontFamily="Segoe UI" MouseLeftButtonDown="Drag">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="Muted" Color="#A79BC9"/>
+        <SolidColorBrush x:Key="Text" Color="#E6E6E6"/>
+        <SolidColorBrush x:Key="Electric" Color="#FFD24A"/>
+        <SolidColorBrush x:Key="Gas" Color="#4DA3FF"/>
+
+        <Style x:Key="SmallLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style x:Key="HeaderBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="22"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#33FFFFFF"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="GhostBtn" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="Padding" Value="12,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                BorderBrush="#4A3A78" BorderThickness="1" CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#33FFFFFF"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- Margin leaves room for the drop shadow -->
+    <Border Margin="12" Padding="18,16" CornerRadius="14"
+            BorderBrush="#4A3A78" BorderThickness="1">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#3B2475" Offset="0"/>
+                <GradientStop Color="#231642" Offset="0.55"/>
+                <GradientStop Color="#140D2B" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="18" ShadowDepth="0" Opacity="0.6"/>
+        </Border.Effect>
+
+        <StackPanel>
+            <!-- Header -->
+            <Grid>
+                <TextBlock Text="TARIFF &amp; COST" Style="{StaticResource SmallLabel}"
+                           FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="RefreshButton" Style="{StaticResource GhostBtn}"
+                            Content="Refresh tariff" Click="RefreshTariff"
+                            ToolTip="Fetch this tariff again from the API"/>
+                    <Button Style="{StaticResource HeaderBtn}" Content="✕" Click="CloseClick"
+                            ToolTip="Close"/>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock x:Name="DayLabel" Text="Today" Foreground="{StaticResource Text}"
+                       FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center"
+                       Margin="0,10,0,2"/>
+            <TextBlock x:Name="CachedLabel" Text="" Style="{StaticResource SmallLabel}"
+                       HorizontalAlignment="Center" FontSize="10"/>
+
+            <!-- Electricity -->
+            <Grid Margin="0,16,0,0">
+                <TextBlock Text="ELECTRICITY" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"
+                           Foreground="{StaticResource Electric}"/>
+                <TextBlock x:Name="ElectricCode" Text="" Style="{StaticResource SmallLabel}"
+                           FontFamily="Consolas" HorizontalAlignment="Right"/>
+            </Grid>
+            <TextBlock x:Name="ElectricRate" Text="—" Foreground="{StaticResource Text}"
+                       FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"/>
+            <TextBlock x:Name="ElectricStanding" Text="" Style="{StaticResource SmallLabel}"
+                       Margin="0,2,0,0" TextWrapping="Wrap"/>
+            <TextBlock x:Name="ElectricBreakdown" Text="" Style="{StaticResource SmallLabel}"
+                       Margin="0,4,0,0" TextWrapping="Wrap"/>
+            <TextBlock x:Name="ElectricTotal" Text="" Foreground="{StaticResource Electric}"
+                       FontSize="16" FontWeight="SemiBold" Margin="0,2,0,0"/>
+
+            <!-- Gas -->
+            <Grid Margin="0,16,0,0">
+                <TextBlock Text="GAS" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"
+                           Foreground="{StaticResource Gas}"/>
+                <TextBlock x:Name="GasCode" Text="" Style="{StaticResource SmallLabel}"
+                           FontFamily="Consolas" HorizontalAlignment="Right"/>
+            </Grid>
+            <TextBlock x:Name="GasRate" Text="—" Foreground="{StaticResource Text}"
+                       FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"/>
+            <TextBlock x:Name="GasStanding" Text="" Style="{StaticResource SmallLabel}"
+                       Margin="0,2,0,0" TextWrapping="Wrap"/>
+            <TextBlock x:Name="GasBreakdown" Text="" Style="{StaticResource SmallLabel}"
+                       Margin="0,4,0,0" TextWrapping="Wrap"/>
+            <TextBlock x:Name="GasTotal" Text="" Foreground="{StaticResource Gas}"
+                       FontSize="16" FontWeight="SemiBold" Margin="0,2,0,0"/>
+
+            <!-- Combined -->
+            <Border Background="#22FFFFFF" CornerRadius="8" Padding="12,9" Margin="0,16,0,0">
+                <Grid>
+                    <TextBlock Text="ESTIMATED TOTAL" Style="{StaticResource SmallLabel}"
+                               FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TotalCost" Text="—" Foreground="{StaticResource Text}"
+                               FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Right"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <TextBlock x:Name="Status" Foreground="{StaticResource Muted}" FontSize="11"
+                       TextWrapping="Wrap" Margin="0,12,0,0"/>
+        </StackPanel>
+    </Border>
+</Window>

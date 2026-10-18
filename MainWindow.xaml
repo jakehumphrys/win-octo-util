@@ -90,6 +90,8 @@
                                VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <Button x:Name="RefreshButton" Style="{StaticResource HeaderBtn}" Content="⟳"
                             Click="Refresh" ToolTip="Refresh"/>
+                    <Button Style="{StaticResource HeaderBtn}" Content="£" Click="OpenTariff"
+                            ToolTip="Tariff &amp; estimated cost"/>
                     <Button Style="{StaticResource HeaderBtn}" Content="⚙" Click="OpenSettings"
                             ToolTip="Settings"/>
                     <Button Style="{StaticResource HeaderBtn}" Content="☰" Click="OpenAudit"
@@ -141,6 +143,8 @@
                                    VerticalAlignment="Bottom" Margin="4,0,0,8"/>
                     </StackPanel>
                     <ProgressBar x:Name="ElectricBar" Foreground="{StaticResource Electric}"/>
+                    <TextBlock x:Name="ElectricCost" Text="≈ £—" Foreground="{StaticResource Electric}"
+                               FontSize="12" Margin="0,6,0,0"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2">
@@ -152,8 +156,14 @@
                                    VerticalAlignment="Bottom" Margin="4,0,0,8"/>
                     </StackPanel>
                     <ProgressBar x:Name="GasBar" Foreground="{StaticResource Gas}"/>
+                    <TextBlock x:Name="GasCost" Text="≈ £—" Foreground="{StaticResource Gas}"
+                               FontSize="12" Margin="0,6,0,0"/>
                 </StackPanel>
             </Grid>
+
+            <!-- Estimated cost for the selected day (always visible) -->
+            <TextBlock x:Name="TotalCost" Text="" Foreground="{StaticResource Muted}"
+                       FontSize="12" HorizontalAlignment="Center" Margin="0,12,0,0"/>
 
             <!-- Collapsible detail (hidden when the header arrow is toggled) -->
             <StackPanel x:Name="Details">

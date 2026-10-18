@@ -29,6 +29,12 @@ public partial class MainWindow : Window
     private DateTime _day = DateTime.Today;
     private bool _busy;
     private AuditWindow? _auditWindow;
+    private TariffWindow? _tariffWindow;
+
+    // The readings currently painted, kept so the tariff window can cost them.
+    private List<Consumption> _electric = new();
+    private List<Consumption> _gas = new();
+    private double _gasFactor = 1.0;
 
     // Tray icon state. Closing the widget hides it here rather than quitting.
     private System.Windows.Forms.NotifyIcon? _tray;
@@ -91,6 +97,23 @@ public partial class MainWindow : Window
         _auditWindow.Show();
     }
 
+    private void OpenTariff(object sender, RoutedEventArgs e) => ShowTariff();
+
+    private void ShowTariff()
+    {
+        if (_tariffWindow is { IsVisible: true })
+        {
+            _tariffWindow.Activate();
+            return;
+        }
+
+        _tariffWindow = new TariffWindow(_settings, _day, _electric, _gas, _gasFactor) { Owner = this };
+
+        // Refreshing the tariff in that window changes the cache, so repaint the cost here.
+        _tariffWindow.Closed += (_, _) => _ = UpdateCostAsync(forceTariff: false);
+        _tariffWindow.Show();
+    }
+
     // The refresh button forces a fresh call for the day on screen, even if it is cached.
     private async void Refresh(object sender, RoutedEventArgs e) => await RefreshData(force: true);
 
@@ -133,7 +156,7 @@ public partial class MainWindow : Window
         // entirely. Today is always fetched because its readings are still arriving.
         if (!force && !isToday && UsageCache.TryGet(_day, _settings, out var cached))
         {
-            ShowCached(cached);
+            await ShowCached(cached);
             return;
         }
 
@@ -171,6 +194,10 @@ public partial class MainWindow : Window
             var gasTotal = ApplyFuel(GasValue, GasBar, GasChart,
                                      gas, _settings.GasGoal, gasFactor);
 
+            _electric = electric;
+            _gas = gas;
+            _gasFactor = gasFactor;
+
             SetReadingInfo(electric, gas);
             ShowCacheBadge(false);
 
@@ -186,6 +213,8 @@ public partial class MainWindow : Window
                 $"Day: {_day:yyyy-MM-dd}\n" +
                 $"Electricity: {electricTotal:0.00} kWh ({electric.Count} readings)\n" +
                 $"Gas: {gasTotal:0.00} kWh ({gas.Count} readings)");
+
+            await UpdateCostAsync(forceTariff: false);
         }
         catch (Exception ex)
         {
@@ -206,13 +235,17 @@ public partial class MainWindow : Window
     /// line and the "from cache" badge make it clear the numbers were not re-fetched,
     /// and the hit is written to the activity log.
     /// </summary>
-    private void ShowCached(UsageCache.Day cached)
+    private async Task ShowCached(UsageCache.Day cached)
     {
         var gasFactor = _settings.GasMeterIsCubicMetres ? CubicMetresToKwh : 1.0;
         var electricTotal = ApplyFuel(ElectricValue, ElectricBar, ElectricChart,
                                       cached.Electricity, _settings.ElectricGoal, 1.0);
         var gasTotal = ApplyFuel(GasValue, GasBar, GasChart,
                                  cached.Gas, _settings.GasGoal, gasFactor);
+
+        _electric = cached.Electricity;
+        _gas = cached.Gas;
+        _gasFactor = gasFactor;
 
         SetReadingInfo(cached.Electricity, cached.Gas);
         ShowCacheBadge(true);
@@ -223,6 +256,56 @@ public partial class MainWindow : Window
             $"Electricity: {electricTotal:0.00} kWh ({cached.Electricity.Count} readings)\n" +
             $"Gas: {gasTotal:0.00} kWh ({cached.Gas.Count} readings)\n" +
             $"Cached: {cached.CachedAt:yyyy-MM-dd HH:mm:ss}");
+
+        await UpdateCostAsync(forceTariff: false);
+    }
+
+    /// <summary>
+    /// Works out the selected day's estimated cost from the cached tariff and paints it.
+    /// Failures are logged and shown as "—" rather than breaking the usage view.
+    /// </summary>
+    private async Task UpdateCostAsync(bool forceTariff)
+    {
+        if (string.IsNullOrWhiteSpace(_settings.ApiKey) ||
+            string.IsNullOrWhiteSpace(_settings.AccountNumber))
+        {
+            ClearCost();
+            return;
+        }
+
+        try
+        {
+            var client = new OctopusClient(_settings.ApiKey);
+            var estimate = await TariffService.EstimateAsync(
+                client, _settings, _day, _electric, _gas, _gasFactor, forceTariff);
+
+            ElectricCost.Text = estimate.HasElectricTariff ? $"≈ £{estimate.ElectricCost:0.00}" : "≈ £—";
+            GasCost.Text = estimate.HasGasTariff ? $"≈ £{estimate.GasCost:0.00}" : "≈ £—";
+            TotalCost.Text = estimate.HasElectricTariff || estimate.HasGasTariff
+                ? $"estimated cost  £{estimate.TotalCost:0.00}"
+                : "";
+
+            if (estimate.HasElectricTariff || estimate.HasGasTariff)
+            {
+                Audit.Event("Cost estimated",
+                    $"Day: {_day:yyyy-MM-dd}\n" +
+                    $"Electricity: £{estimate.ElectricCost:0.00}\n" +
+                    $"Gas: £{estimate.GasCost:0.00}\n" +
+                    $"Total: £{estimate.TotalCost:0.00}");
+            }
+        }
+        catch (Exception ex)
+        {
+            ClearCost();
+            Audit.Event("Cost estimate failed", ex.Message, true);
+        }
+    }
+
+    private void ClearCost()
+    {
+        ElectricCost.Text = "≈ £—";
+        GasCost.Text = "≈ £—";
+        TotalCost.Text = "";
     }
 
     /// <summary>Writes the "last reading" line shared by the live and cached paths.</summary>
