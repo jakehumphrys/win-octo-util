@@ -99,8 +99,8 @@
                     <Button x:Name="CollapseToggle" Style="{StaticResource HeaderBtn}" Content="▾"
                             Click="ToggleDetails" ToolTip="Collapse"/>
                     <Button Style="{StaticResource HeaderBtn}" Content="–" Click="Minimise"/>
-                    <Button Style="{StaticResource HeaderBtn}" Content="✕" Click="CloseClick"
-                            ToolTip="Hide to tray"/>
+                    <Button x:Name="CloseButton" Style="{StaticResource HeaderBtn}" Content="✕"
+                            Click="CloseClick" ToolTip="Hide to tray"/>
                 </StackPanel>
             </Grid>
 

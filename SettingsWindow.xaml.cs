@@ -21,6 +21,7 @@ public partial class SettingsWindow : Window
         GasMpanBox.Text = _settings.GasMpan;
         GasSerialBox.Text = _settings.GasMeterSerial;
         GasCubicMetresBox.IsChecked = _settings.GasMeterIsCubicMetres;
+        CloseToTrayBox.IsChecked = _settings.CloseToTray;
         ElectricGoalBox.Text = FormatGoal(_settings.ElectricGoal);
         GasGoalBox.Text = FormatGoal(_settings.GasGoal);
     }
@@ -47,6 +48,7 @@ public partial class SettingsWindow : Window
         Note(GasMpanBox.Text.Trim() != _settings.GasMpan, "gas meter MPAN");
         Note(GasSerialBox.Text.Trim() != _settings.GasMeterSerial, "gas meter serial");
         Note((GasCubicMetresBox.IsChecked == true) != _settings.GasMeterIsCubicMetres, "gas units");
+        Note((CloseToTrayBox.IsChecked == true) != _settings.CloseToTray, "X button behaviour");
         Note(ParseGoal(ElectricGoalBox.Text) != _settings.ElectricGoal, "electricity goal");
         Note(ParseGoal(GasGoalBox.Text) != _settings.GasGoal, "gas goal");
 
@@ -57,6 +59,7 @@ public partial class SettingsWindow : Window
         _settings.GasMpan = GasMpanBox.Text.Trim();
         _settings.GasMeterSerial = GasSerialBox.Text.Trim();
         _settings.GasMeterIsCubicMetres = GasCubicMetresBox.IsChecked == true;
+        _settings.CloseToTray = CloseToTrayBox.IsChecked == true;
         _settings.ElectricGoal = ParseGoal(ElectricGoalBox.Text);
         _settings.GasGoal = ParseGoal(GasGoalBox.Text);
 

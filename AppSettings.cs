@@ -27,6 +27,12 @@ public class AppSettings
     public double GasGoal { get; set; }
     public double ElectricGoal { get; set; }
 
+    /// <summary>
+    /// What the window's ✕ button does. True (the default) hides the widget to the
+    /// notification area; false quits the application outright.
+    /// </summary>
+    public bool CloseToTray { get; set; } = true;
+
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
     private static string Dir => Path.Combine(

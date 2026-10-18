@@ -48,6 +48,7 @@ public partial class MainWindow : Window
 
         SetUpTrayIcon();
         Closing += OnClosing;
+        UpdateCloseButtonTooltip();
 
         // A wall clock only. The widget never polls the API on a timer - data is
         // pulled once on start-up and whenever the refresh button is pressed.
@@ -80,6 +81,7 @@ public partial class MainWindow : Window
 
         // Pick up anything that was changed, then show it straight away.
         _settings = AppSettings.Load();
+        UpdateCloseButtonTooltip();
         await RefreshData();
     }
 
@@ -494,14 +496,27 @@ public partial class MainWindow : Window
         Application.Current.Shutdown();
     }
 
-    // The ✕ button raises Closing; unless we are really quitting, hide to the tray instead.
+    // The ✕ button raises Closing. Depending on the setting it either hides the widget to
+    // the tray or quits outright; the tray menu always quits.
     private void OnClosing(object? sender, CancelEventArgs e)
     {
         if (_exiting) return;
 
+        if (!_settings.CloseToTray)
+        {
+            _exiting = true;
+            _tray?.Dispose();
+            _tray = null;
+            return; // Let the window close and the application shut down.
+        }
+
         e.Cancel = true;
         HideToTray();
     }
+
+    /// <summary>Keeps the ✕ button's tooltip in step with the configured behaviour.</summary>
+    private void UpdateCloseButtonTooltip()
+        => CloseButton.ToolTip = _settings.CloseToTray ? "Hide to tray" : "Close";
 
     private static Brush Brush(string hex) => (Brush)new BrushConverter().ConvertFromString(hex)!;
 }
