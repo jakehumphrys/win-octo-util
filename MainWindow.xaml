@@ -12,6 +12,10 @@
         <SolidColorBrush x:Key="Track" Color="#4A3A78"/>
         <SolidColorBrush x:Key="Warn" Color="#F2C94C"/>
 
+        <!-- Fuel colours: anything electric is yellow, anything gas is blue. -->
+        <SolidColorBrush x:Key="Electric" Color="#FFD24A"/>
+        <SolidColorBrush x:Key="Gas" Color="#4DA3FF"/>
+
         <!-- Rounded progress bar. Height sets thickness, Foreground sets fill colour -->
         <Style TargetType="ProgressBar">
             <Setter Property="Height" Value="8"/>
@@ -93,7 +97,8 @@
                     <Button x:Name="CollapseToggle" Style="{StaticResource HeaderBtn}" Content="▾"
                             Click="ToggleDetails" ToolTip="Collapse"/>
                     <Button Style="{StaticResource HeaderBtn}" Content="–" Click="Minimise"/>
-                    <Button Style="{StaticResource HeaderBtn}" Content="✕" Click="Close"/>
+                    <Button Style="{StaticResource HeaderBtn}" Content="✕" Click="CloseClick"
+                            ToolTip="Hide to tray"/>
                 </StackPanel>
             </Grid>
 
@@ -131,22 +136,22 @@
                     <TextBlock Text="ELECTRICITY" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
                     <StackPanel Orientation="Horizontal" Margin="0,2,0,6">
                         <TextBlock x:Name="ElectricValue" Text="—" FontFamily="Segoe UI Light"
-                                   FontSize="44" Foreground="#3DDC84"/>
-                        <TextBlock Text="kWh" FontSize="15" Foreground="#3DDC84"
+                                   FontSize="44" Foreground="{StaticResource Electric}"/>
+                        <TextBlock Text="kWh" FontSize="15" Foreground="{StaticResource Electric}"
                                    VerticalAlignment="Bottom" Margin="4,0,0,8"/>
                     </StackPanel>
-                    <ProgressBar x:Name="ElectricBar" Foreground="#3DDC84"/>
+                    <ProgressBar x:Name="ElectricBar" Foreground="{StaticResource Electric}"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2">
                     <TextBlock Text="GAS" Style="{StaticResource SmallLabel}" FontWeight="SemiBold"/>
                     <StackPanel Orientation="Horizontal" Margin="0,2,0,6">
                         <TextBlock x:Name="GasValue" Text="—" FontFamily="Segoe UI Light"
-                                   FontSize="44" Foreground="#3DDC84"/>
-                        <TextBlock Text="kWh" FontSize="15" Foreground="#3DDC84"
+                                   FontSize="44" Foreground="{StaticResource Gas}"/>
+                        <TextBlock Text="kWh" FontSize="15" Foreground="{StaticResource Gas}"
                                    VerticalAlignment="Bottom" Margin="4,0,0,8"/>
                     </StackPanel>
-                    <ProgressBar x:Name="GasBar" Foreground="#3DDC84"/>
+                    <ProgressBar x:Name="GasBar" Foreground="{StaticResource Gas}"/>
                 </StackPanel>
             </Grid>
 
@@ -171,7 +176,7 @@
                         <DataTemplate>
                             <Grid Background="Transparent" ToolTip="{Binding ToolTip}">
                                 <Border Height="{Binding Height}" VerticalAlignment="Bottom" Margin="0.5,0"
-                                        CornerRadius="2,2,0,0" Background="#3DDC84"/>
+                                        CornerRadius="2,2,0,0" Background="{StaticResource Electric}"/>
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -192,7 +197,7 @@
                         <DataTemplate>
                             <Grid Background="Transparent" ToolTip="{Binding ToolTip}">
                                 <Border Height="{Binding Height}" VerticalAlignment="Bottom" Margin="0.5,0"
-                                        CornerRadius="2,2,0,0" Background="#F2994A"/>
+                                        CornerRadius="2,2,0,0" Background="{StaticResource Gas}"/>
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

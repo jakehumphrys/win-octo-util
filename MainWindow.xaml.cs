@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -29,9 +30,18 @@ public partial class MainWindow : Window
     private bool _busy;
     private AuditWindow? _auditWindow;
 
+    // Tray icon state. Closing the widget hides it here rather than quitting.
+    private System.Windows.Forms.NotifyIcon? _tray;
+    private System.Drawing.Icon? _trayIcon;
+    private bool _exiting;
+    private bool _trayHintShown;
+
     public MainWindow()
     {
         InitializeComponent();
+
+        SetUpTrayIcon();
+        Closing += OnClosing;
 
         // A wall clock only. The widget never polls the API on a timer - data is
         // pulled once on start-up and whenever the refresh button is pressed.
@@ -51,7 +61,9 @@ public partial class MainWindow : Window
     }
 
     private void Minimise(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
-    private void Close(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
+
+    // The ✕ hides the widget to the notification area; quitting is done from the tray menu.
+    private void CloseClick(object sender, RoutedEventArgs e) => Close();
 
     private async void OpenSettings(object sender, RoutedEventArgs e)
     {
@@ -65,7 +77,9 @@ public partial class MainWindow : Window
         await RefreshData();
     }
 
-    private void OpenAudit(object sender, RoutedEventArgs e)
+    private void OpenAudit(object sender, RoutedEventArgs e) => ShowAudit();
+
+    private void ShowAudit()
     {
         if (_auditWindow is { IsVisible: true })
         {
@@ -317,6 +331,93 @@ public partial class MainWindow : Window
         Details.Visibility = collapse ? Visibility.Collapsed : Visibility.Visible;
         CollapseToggle.Content = collapse ? "▴" : "▾";
         CollapseToggle.ToolTip = collapse ? "Expand" : "Collapse";
+    }
+
+    // ── Notification area (tray) ─────────────────────────────────────────────
+    // WPF has no tray icon of its own, so the WinForms NotifyIcon is used. It shares
+    // the WPF UI thread, so its events are raised on the right dispatcher.
+
+    /// <summary>Creates the tray icon and its menu.</summary>
+    private void SetUpTrayIcon()
+    {
+        _trayIcon = LoadAppIcon();
+
+        var menu = new System.Windows.Forms.ContextMenuStrip();
+        menu.Items.Add("Show widget", null, (_, _) => RestoreFromTray());
+        menu.Items.Add("Activity log", null, (_, _) => ShowAudit());
+        menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
+        menu.Items.Add("Exit", null, (_, _) => ExitApplication());
+
+        _tray = new System.Windows.Forms.NotifyIcon
+        {
+            Icon = _trayIcon,
+            Text = "WinOctoUtil - energy usage",
+            Visible = true,
+            ContextMenuStrip = menu
+        };
+        _tray.DoubleClick += (_, _) => RestoreFromTray();
+    }
+
+    /// <summary>The app's own icon (the octopus), taken from the built .exe.</summary>
+    private static System.Drawing.Icon LoadAppIcon()
+    {
+        try
+        {
+            var path = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(path))
+            {
+                var icon = System.Drawing.Icon.ExtractAssociatedIcon(path);
+                if (icon is not null) return icon;
+            }
+        }
+        catch
+        {
+            // Fall back to the generic application icon below.
+        }
+
+        return System.Drawing.SystemIcons.Application;
+    }
+
+    /// <summary>Brings the widget back from the tray.</summary>
+    private void RestoreFromTray()
+    {
+        Show();
+        WindowState = WindowState.Normal;
+        Activate();
+        Topmost = true;
+    }
+
+    /// <summary>Hides the widget and shows a one-time hint that it is still running.</summary>
+    private void HideToTray()
+    {
+        Hide();
+        Audit.Event("Widget hidden to tray");
+
+        if (_trayHintShown) return;
+        _trayHintShown = true;
+        _tray?.ShowBalloonTip(
+            3000,
+            "WinOctoUtil",
+            "Still running here - double-click the tray icon to reopen.",
+            System.Windows.Forms.ToolTipIcon.Info);
+    }
+
+    /// <summary>Really quits, called from the tray menu.</summary>
+    private void ExitApplication()
+    {
+        _exiting = true;
+        _tray?.Dispose();
+        _tray = null;
+        Application.Current.Shutdown();
+    }
+
+    // The ✕ button raises Closing; unless we are really quitting, hide to the tray instead.
+    private void OnClosing(object? sender, CancelEventArgs e)
+    {
+        if (_exiting) return;
+
+        e.Cancel = true;
+        HideToTray();
     }
 
     private static Brush Brush(string hex) => (Brush)new BrushConverter().ConvertFromString(hex)!;
